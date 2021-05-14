@@ -94,7 +94,7 @@ int rozwiazPKSDodatk(int x, int y, int ruchi, int rozw[N][N],
 // Główna funkcja
 int main()
 {
-    // Wezwanie funkcji dodatkowych
+    // Wezwanie funkcji
     rozwiazPKS();
     system("pause");
     return 0;
