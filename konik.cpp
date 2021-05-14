@@ -91,10 +91,10 @@ int rozwiazPKSDodatk(int x, int y, int ruchi, int rozw[N][N],
     return 0;
 }
 
-// Główny kod
+// Główna funkcja
 int main()
 {
-    // Wezwanie funkcji
+    // Wezwanie funkcji dodatkowych
     rozwiazPKS();
     system("pause");
     return 0;
