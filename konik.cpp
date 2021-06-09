@@ -1,101 +1,163 @@
 #include <iostream>
-#include <iomanip>
-using namespace std;
-
+#include <bits/stdc++.h>
 #define N 8
+// C++ program to for Kinight's tour problem usin
+// Warnsdorff's algorithm
 
-int rozwiazPKSDodatk(int x, int y, int ruchi, int rozw[N][N],
-                     int xRuch[], int yRuch[]);
+// Move pattern on basis of the change of
+// x coordinates and y coordinates respectively
+static int cx[N] = {1, 1, 2, 2, -1, -1, -2, -2};
+static int cy[N] = {2, -2, 1, -1, 2, -2, 1, -1};
 
-/* Dodatkowa funkcja do sprawdzenia, czy i, j są
-poprawnymi indeksami dla szachownicy N*N */
-int jestPoprawne(int x, int y, int rozw[N][N])
+// function restricts the knight to remain within
+// the 8x8 chessboard
+bool limits(int x, int y)
 {
-    return (x >= 0 && x < N && y >= 0 && y < N && rozw[x][y] == -1);
+    return ((x >= 0 && y >= 0) && (x < N && y < N));
 }
 
-/* Dodatkowa funkcja do drukowania
-macierzy rozwiązania rozw[N][N] */
-void drukujRozwiazanie(int rozw[N][N])
+/* Checks whether a square is valid and empty or not */
+bool isempty(int a[], int x, int y)
 {
-    for (int x = 0; x < N; x++)
-    {
-        for (int y = 0; y < N; y++)
-            cout << " " << setw(2) << rozw[x][y] << " ";
-        cout << endl;
-    }
+    return (limits(x, y)) && (a[y * N + x] < 0);
 }
 
-/* Ta funckja rozwiązuje problem konika szachowego poprzez cofanie się.
-Ta funkcja korzysta głównie z rozwiazPKSDodatk() aby rozwiązać problem.
-Zwraca false jeżeli żadna pełna ścieżka nie jest dostępna, w innym
-przypadku zwraca true i drukuje ścieżkę. Należy zwrócić uwagę na to
-że możliwe są inne rozwiązania, funkcja ta wypisuje tylko jedną z możliwych.*/
-int rozwiazPKS()
+/* Returns the number of empty squares adjacent
+   to (x, y) */
+int getDegree(int a[], int x, int y)
 {
-    int rozw[N][N];
+    int count = 0;
+    for (int i = 0; i < N; ++i)
+        if (isempty(a, (x + cx[i]), (y + cy[i])))
+            count++;
 
-    /* Wstępne ładowanie macierzy rozwiązań */
-    for (int x = 0; x < N; x++)
-        for (int y = 0; y < N; y++)
-            rozw[x][y] = -1;
-
-    /* xRuch[] i yRuch[] definiują kolejny ruch konika.
-    xRuch[] jest dla na następnej wartości współrzędnej x
-    yRuch[] jest dla na następnej wartości współrzędnej y */
-    int xRuch[8] = {2, 1, -1, -2, -2, -1, 1, 2};
-    int yRuch[8] = {1, 2, 2, 1, -1, -2, -2, -1};
-
-    // Skoro konik początkowo jest na pierwszym polu
-    rozw[0][0] = 0;
-
-    /* Zacznij od 0,0 i sprawdź wszystkie ścieżki przy użyciu
-    rozwiazPKSDodatk() */
-    if (rozwiazPKSDodatk(0, 0, 1, rozw, xRuch, yRuch) == 0)
-    {
-        cout << "rozwution does not exist";
-        return 0;
-    }
-    else
-        drukujRozwiazanie(rozw);
-
-    return 1;
+    return count;
 }
 
-/* Rekursywna funkcja dodatkowa dla rozwiązania problemu konika szachowego */
-int rozwiazPKSDodatk(int x, int y, int ruchi, int rozw[N][N],
-                     int xRuch[N], int yRuch[N])
+// Picks next point using Warnsdorff's heuristic.
+// Returns false if it is not possible to pick
+// next point.
+bool nextMove(int a[], int *x, int *y)
 {
-    int k, nast_x, nast_y;
-    if (ruchi == N * N)
-        return 1;
+    int min_deg_idx = -1, c, min_deg = (N + 1), nx, ny;
 
-    /* Wypróbuj wszystkie ruchy z
-    obecnej pozycji x, y */
-    for (k = 0; k < 8; k++)
+    // Try all N adjacent of (*x, *y) starting
+    // from a random adjacent. Find the adjacent
+    // with minimum degree.
+    int start = rand() % N;
+    for (int count = 0; count < N; ++count)
     {
-        nast_x = x + xRuch[k];
-        nast_y = y + yRuch[k];
-        if (jestPoprawne(nast_x, nast_y, rozw))
+        int i = (start + count) % N;
+        nx = *x + cx[i];
+        ny = *y + cy[i];
+        if ((isempty(a, nx, ny)) &&
+            (c = getDegree(a, nx, ny)) < min_deg)
         {
-            rozw[nast_x][nast_y] = ruchi;
-            if (rozwiazPKSDodatk(nast_x, nast_y, ruchi + 1, rozw,
-                                 xRuch, yRuch) == 1)
-                return 1;
-            else
-
-                // backtracking
-                rozw[nast_x][nast_y] = -1;
+            min_deg_idx = i;
+            min_deg = c;
         }
     }
-    return 0;
+
+    // IF we could not find a next cell
+    if (min_deg_idx == -1)
+        return false;
+
+    // Store coordinates of next point
+    nx = *x + cx[min_deg_idx];
+    ny = *y + cy[min_deg_idx];
+
+    // Mark next move
+    a[ny * N + nx] = a[(*y) * N + (*x)] + 1;
+
+    // Update next point
+    *x = nx;
+    *y = ny;
+
+    return true;
 }
 
-// Główna funkcja
+/* displays the chessboard with all the
+  legal knight's moves */
+void print(int a[])
+{
+    for (int i = 0; i < N; ++i)
+    {
+        for (int j = 0; j < N; ++j)
+            printf("%d\t", a[j * N + i]);
+        printf("\n");
+    }
+}
+
+/* checks its neighbouring sqaures */
+/* If the knight ends on a square that is one
+   knight's move from the beginning square,
+   then tour is closed */
+bool neighbour(int x, int y, int xx, int yy)
+{
+    for (int i = 0; i < N; ++i)
+        if (((x + cx[i]) == xx) && ((y + cy[i]) == yy))
+            return true;
+
+    return false;
+}
+
+/* Generates the legal moves using warnsdorff's
+  heuristics. Returns false if not possible */
+bool findClosedTour(int zmiennaX, int zmiennaY)
+{
+    // Filling up the chessboard matrix with -1's
+    int a[N * N];
+    for (int i = 0; i < N * N; ++i)
+        a[i] = -1;
+
+    // Randome initial position
+    int sx = zmiennaX; //rand()%N;
+    int sy = zmiennaY; //rand()%N;
+
+    // Current points are same as initial points
+    int x = sx, y = sy;
+    a[y * N + x] = 1; // Mark first move.
+
+    // Keep picking next points using
+    // Warnsdorff's heuristic
+    for (int i = 0; i < N * N - 1; ++i)
+        if (nextMove(a, &x, &y) == 0)
+            return false;
+
+    // Check if tour is closed (Can end
+    // at starting point)
+    if (!neighbour(x, y, sx, sy))
+        return false;
+
+    print(a);
+    return true;
+}
+
+// Driver code
 int main()
 {
-    // Wezwanie funkcji
-    rozwiazPKS();
-    system("pause");
+    int zmiennaX = 0;
+    int zmiennaY = 0;
+    // To make sure that different random
+    // initial positions are picked.
+    //srand(time(NULL));
+    std::cout << "Podaj wartosc x\n";
+    std::cin >> zmiennaX;
+    std::cout << "Podaj wartosc y\n";
+    std::cin >> zmiennaY;
+
+    // While we don't get a solution
+
+    if (zmiennaX < 8 && zmiennaY < 8)
+    {
+        while (!findClosedTour(zmiennaX, zmiennaY))
+        {
+            ;
+        }
+    }
+    else
+    {
+        std::cout << "Wartosci poza tablica";
+    }
     return 0;
 }
