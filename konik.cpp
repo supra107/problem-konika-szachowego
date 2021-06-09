@@ -1,98 +1,80 @@
 #include <iostream>
 #include <bits/stdc++.h>
-#define N 8
-// C++ program to for Kinight's tour problem usin
-// Warnsdorff's algorithm
+#include <chrono>
 
-// Move pattern on basis of the change of
-// x coordinates and y coordinates respectively
+#define N 8
+
+/* xRuch[] i yRuch[] definiują kolejny ruch konika.
+  xRuch[] jest dla na następnej wartości współrzędnej x
+  yRuch[] jest dla na następnej wartości współrzędnej y */
 static int cx[N] = {1, 1, 2, 2, -1, -1, -2, -2};
 static int cy[N] = {2, -2, 1, -1, 2, -2, 1, -1};
 
-// function restricts the knight to remain within
-// the 8x8 chessboard
-bool limits(int x, int y)
+bool limity(int x, int y)
 {
     return ((x >= 0 && y >= 0) && (x < N && y < N));
 }
 
-/* Checks whether a square is valid and empty or not */
-bool isempty(int a[], int x, int y)
+bool jestPusty(int *a, int x, int y)
 {
-    return (limits(x, y)) && (a[y * N + x] < 0);
+    return (limity(x, y)) && (a[y * N + x] < 0);
 }
 
-/* Returns the number of empty squares adjacent
-   to (x, y) */
-int getDegree(int a[], int x, int y)
+int zwrocStopien(int *a, int x, int y)
 {
     int count = 0;
     for (int i = 0; i < N; ++i)
-        if (isempty(a, (x + cx[i]), (y + cy[i])))
+        if (jestPusty(a, (x + cx[i]), (y + cy[i])))
             count++;
 
     return count;
 }
 
-// Picks next point using Warnsdorff's heuristic.
-// Returns false if it is not possible to pick
-// next point.
-bool nextMove(int a[], int *x, int *y)
+bool nastepnyRuch(int *a, int *x, int *y)
 {
     int min_deg_idx = -1, c, min_deg = (N + 1), nx, ny;
 
-    // Try all N adjacent of (*x, *y) starting
-    // from a random adjacent. Find the adjacent
-    // with minimum degree.
     int start = rand() % N;
     for (int count = 0; count < N; ++count)
     {
         int i = (start + count) % N;
         nx = *x + cx[i];
         ny = *y + cy[i];
-        if ((isempty(a, nx, ny)) &&
-            (c = getDegree(a, nx, ny)) < min_deg)
+        if ((jestPusty(a, nx, ny)) &&
+            (c = zwrocStopien(a, nx, ny)) < min_deg)
         {
             min_deg_idx = i;
             min_deg = c;
         }
     }
 
-    // IF we could not find a next cell
     if (min_deg_idx == -1)
         return false;
 
-    // Store coordinates of next point
     nx = *x + cx[min_deg_idx];
     ny = *y + cy[min_deg_idx];
 
-    // Mark next move
     a[ny * N + nx] = a[(*y) * N + (*x)] + 1;
 
-    // Update next point
     *x = nx;
     *y = ny;
 
     return true;
 }
 
-/* displays the chessboard with all the
-  legal knight's moves */
-void print(int a[])
+/* Dodatkowa funkcja do drukowania
+macierzy rozwiązania rozw[N][N] */
+void drukuj(int *a)
 {
     for (int i = 0; i < N; ++i)
     {
         for (int j = 0; j < N; ++j)
-            printf("%d\t", a[j * N + i]);
-        printf("\n");
+            std::cout << a[j * N + i] << "\t";
+        std::cout << "\n";
     }
 }
 
-/* checks its neighbouring sqaures */
-/* If the knight ends on a square that is one
-   knight's move from the beginning square,
-   then tour is closed */
-bool neighbour(int x, int y, int xx, int yy)
+bool sasiedni(int x, int y, int xx, int yy)
 {
     for (int i = 0; i < N; ++i)
         if (((x + cx[i]) == xx) && ((y + cy[i]) == yy))
@@ -101,59 +83,59 @@ bool neighbour(int x, int y, int xx, int yy)
     return false;
 }
 
-/* Generates the legal moves using warnsdorff's
-  heuristics. Returns false if not possible */
-bool findClosedTour(int zmiennaX, int zmiennaY)
+bool ZnajdzNablizszyRuch(int zmiennaX, int zmiennaY)
 {
-    // Filling up the chessboard matrix with -1's
+
     int a[N * N];
     for (int i = 0; i < N * N; ++i)
         a[i] = -1;
 
-    // Randome initial position
-    int sx = zmiennaX; //rand()%N;
-    int sy = zmiennaY; //rand()%N;
+    int sx = zmiennaX;
+    int sy = zmiennaY;
 
-    // Current points are same as initial points
     int x = sx, y = sy;
-    a[y * N + x] = 1; // Mark first move.
+    a[y * N + x] = 1;
 
-    // Keep picking next points using
-    // Warnsdorff's heuristic
     for (int i = 0; i < N * N - 1; ++i)
-        if (nextMove(a, &x, &y) == 0)
+        if (nastepnyRuch(a, &x, &y) == 0)
             return false;
 
-    // Check if tour is closed (Can end
-    // at starting point)
-    if (!neighbour(x, y, sx, sy))
+    if (!sasiedni(x, y, sx, sy))
         return false;
 
-    print(a);
+    drukuj(a);
     return true;
 }
 
-// Driver code
 int main()
 {
+    using std::chrono::duration;
+    using std::chrono::duration_cast;
+    using std::chrono::high_resolution_clock;
+    using std::chrono::milliseconds;
+
     int zmiennaX = 0;
     int zmiennaY = 0;
-    // To make sure that different random
-    // initial positions are picked.
-    //srand(time(NULL));
+    std::cout << "Podaj startowa pozycje konika.\n";
+    std::cout << "y - wartosci szachownicy na osi y, dozwolone 1-8\n";
+    std::cout << "x - wartosci szachownicy na osi x, dozwolone 1-8\n";
     std::cout << "Podaj wartosc x\n";
     std::cin >> zmiennaX;
     std::cout << "Podaj wartosc y\n";
     std::cin >> zmiennaY;
-
-    // While we don't get a solution
-
-    if (zmiennaX < 8 && zmiennaY < 8)
+    auto t1 = std::chrono::high_resolution_clock::now();
+    zmiennaX--;
+    zmiennaY--;
+    if (zmiennaX < 8 && zmiennaX >= 0 && zmiennaY < 8 && zmiennaY >= 0)
     {
-        while (!findClosedTour(zmiennaX, zmiennaY))
+        bool znajdzRozwiazanie = false;
+        while (!znajdzRozwiazanie)
         {
-            ;
+            znajdzRozwiazanie = ZnajdzNablizszyRuch(zmiennaX, zmiennaY);
         }
+        auto t2 = std::chrono::high_resolution_clock::now();
+        auto ms_int = duration_cast<std::chrono::milliseconds>(t2 - t1);
+        std::cout << " \nCzas dzialania algorytmu: " << ms_int.count() << " milisekund\n";
     }
     else
     {
