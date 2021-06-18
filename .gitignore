@@ -1,2 +1,6 @@
 konik.exe
 .vscode/launch.json
+.idea
+konik.ilk
+.gitignore
+konik.pdb
