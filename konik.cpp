@@ -4,9 +4,10 @@
 
 #define N 8
 
-/* xRuch[] i yRuch[] definiuj¹ kolejny ruch konika.
-  xRuch[] jest dla na nastêpnej wartoœci wspó³rzêdnej x
-  yRuch[] jest dla na nastêpnej wartoœci wspó³rzêdnej y */
+//// xRuch[] i yRuch[] definiuj¹ kolejny ruch konika.
+//// xRuch[] jest dla na nastêpnej wartoœci wspó³rzêdnej x
+//// yRuch[] jest dla na nastêpnej wartoœci wspó³rzêdnej y
+//// @note test note
 static int mozliweRuchyOsX[N] = {1, 1, 2, 2, -1, -1, -2, -2};
 static int mozliweRuchyOsY[N] = {2, -2, 1, -1, 2, -2, 1, -1};
 
