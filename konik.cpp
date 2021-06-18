@@ -28,7 +28,7 @@ bool jestPusty(int *a, int x, int y) {
 }
 
 /*
-
+ Zwraca liczbe pol ktore nie zostaly odwiedzone przez konika.
  */
 int zwrocStopien(int *a, int x, int y) {
     int count = 0;
@@ -39,6 +39,9 @@ int zwrocStopien(int *a, int x, int y) {
     return count;
 }
 
+/*
+ * Zwroci true jesli wylosowany ruch nie byl uczesczany i nie znajduje sie poza plansza
+ */
 bool nastepnyRuch(int *a, int *x, int *y) {
     int min_deg_idx = -1;
     int c;
@@ -83,6 +86,9 @@ void drukuj(int *a) {
     }
 }
 
+/*
+ * Sprawdza czy kolejny ruch konika sasiaduje z poprzednim
+ */
 bool sasiedni(int x, int y, int xx, int yy) {
     for (int i = 0; i < N; ++i)
         if (((x + mozliweRuchyOsX[i]) == xx) && ((y + mozliweRuchyOsY[i]) == yy))
@@ -90,6 +96,11 @@ bool sasiedni(int x, int y, int xx, int yy) {
 
     return false;
 }
+
+/*
+Glowna metoda, wyszukuje najblizszy mozliwy ruch konika z uwzglednieniem poprzednich ruchow,
+konik odwiedza tylko raz kazde pole.
+ */
 
 bool ZnajdzNablizszyRuch(int zmiennaX, int zmiennaY) {
 
@@ -115,7 +126,16 @@ bool ZnajdzNablizszyRuch(int zmiennaX, int zmiennaY) {
     return true;
 }
 
+
+/*
+ * Metoda main, w niej wykonuje sie caly algorytm.
+ */
+
 int main() {
+
+    /*
+     * Biblioteki wykorzystane do obliczania czasu trwania algorytmu.
+     */
     using std::chrono::high_resolution_clock;
     using std::chrono::duration_cast;
     using std::chrono::duration;
@@ -131,8 +151,8 @@ int main() {
     std::cout << "Podaj wartosc y\n";
     std::cin >> zmiennaY;
     auto t1 = std::chrono::high_resolution_clock::now();
-    zmiennaX --;
-    zmiennaY --;
+    zmiennaX--;
+    zmiennaY--;
     if (zmiennaX < 8 && zmiennaX >= 0 && zmiennaY < 8 && zmiennaY >= 0) {
         bool znajdzRozwiazanie = false;
         while (!znajdzRozwiazanie) {
